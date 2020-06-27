@@ -3,59 +3,105 @@ use std::error::Error;
 use std::fmt;
 use std::collections::VecDeque;
 
-pub enum Command {
-    Unknown,
-    Init,
-    Generate
+#[derive(Debug)]
+pub struct CommandParsingError {
+    details: String
 }
 
-impl fmt::Display for Command {
+impl CommandParsingError {
+    fn new(msg: &str) -> CommandParsingError {
+        CommandParsingError{details: msg.to_string()}
+    }
+}
+
+impl fmt::Display for CommandParsingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Command::Unknown => write!(f, "Unknown"),
-            Command::Init => write!(f, "Init"),
-            Command::Generate => write!(f, "Generate")
-        }
+        write!(f,"{}",self.details)
     }
 }
 
-pub struct Config {
-    pub command: Command,
-}
-
-impl Config {
-
-
-    pub fn new(env_args: env::Args) -> Result<Config, &'static str> {
-
-        let mut args: VecDeque<String> = VecDeque::new();
-
-        for arg in env_args.skip(1) {
-            args.push_back(arg);
-        }
-
-        if args.len() < 1 {
-            return Err("not enough arguments");
-        }
-
-        let command_arg = args.pop_front().unwrap();
-
-        println!("command arg: {}", command_arg);
-
-        let command = Command::Unknown;
-
-        Ok(Config {
-            command
-        })
+impl Error for CommandParsingError {
+    fn description(&self) -> &str {
+        &self.details
     }
 }
 
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-
-    println!("Command: {}", config.command);
-
-    Ok(())
+#[derive(Debug)]
+pub struct CommandExecutionError {
+    details: String
 }
+
+impl CommandExecutionError {
+    fn new(msg: &str) -> CommandExecutionError {
+        CommandExecutionError{details: msg.to_string()}
+    }
+}
+
+impl fmt::Display for CommandExecutionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,"{}",self.details)
+    }
+}
+
+impl Error for CommandExecutionError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
+
+pub trait Command {
+    fn execute(&self) -> Result<(), CommandExecutionError>;
+}
+
+struct InitCommand {
+}
+
+impl Command for InitCommand {
+
+    fn execute(&self) -> Result<(), CommandExecutionError> {
+        println!("INIT!");
+        Ok(())
+    }
+}
+
+struct GenerateCommand {
+}
+
+impl Command for GenerateCommand {
+    fn execute(&self) -> Result<(), CommandExecutionError> {
+        Err(CommandExecutionError::new("Not implemented yet."))
+    }
+}
+
+pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, CommandParsingError> {
+
+    let mut args: VecDeque<String> = VecDeque::new();
+
+    for arg in env_args.skip(1) {
+        args.push_back(arg);
+    }
+
+    if args.len() < 1 {
+        return Err(CommandParsingError::new("not enough arguments"));
+    }
+
+    Ok(Box::new(InitCommand {} ))
+}
+
+pub fn run() {
+
+    match make_command(std::env::args()) {
+
+        Ok(cmd) => { 
+            cmd.execute().unwrap_or_else(|err| {
+                println!("ERROR: {}", err)
+            });
+        },        
+        Err(err) => println!("ERROR: {}", err)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
