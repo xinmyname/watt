@@ -9,8 +9,8 @@ pub struct CommandParsingError {
 }
 
 impl CommandParsingError {
-    fn new(msg: &str) -> CommandParsingError {
-        CommandParsingError{details: msg.to_string()}
+    fn new(msg: &str) -> Box<CommandParsingError> {
+        Box::new(CommandParsingError{details: msg.to_string()})
     }
 }
 
@@ -32,8 +32,8 @@ pub struct CommandExecutionError {
 }
 
 impl CommandExecutionError {
-    fn new(msg: &str) -> CommandExecutionError {
-        CommandExecutionError{details: msg.to_string()}
+    fn new(msg: &str) -> Box<CommandExecutionError> {
+        Box::new(CommandExecutionError{details: msg.to_string()})
     }
 }
 
@@ -51,7 +51,7 @@ impl Error for CommandExecutionError {
 
 
 pub trait Command {
-    fn execute(&self) -> Result<(), CommandExecutionError>;
+    fn execute(&self) -> Result<(), Box<dyn Error>>;
 }
 
 struct InitCommand {
@@ -59,7 +59,7 @@ struct InitCommand {
 
 impl Command for InitCommand {
 
-    fn execute(&self) -> Result<(), CommandExecutionError> {
+    fn execute(&self) -> Result<(), Box<dyn Error>> {
         println!("INIT!");
         Ok(())
     }
@@ -69,12 +69,12 @@ struct GenerateCommand {
 }
 
 impl Command for GenerateCommand {
-    fn execute(&self) -> Result<(), CommandExecutionError> {
+    fn execute(&self) -> Result<(), Box<dyn Error>> {
         Err(CommandExecutionError::new("Not implemented yet."))
     }
 }
 
-pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, CommandParsingError> {
+pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, Box<dyn Error>> {
 
     let mut args: VecDeque<String> = VecDeque::new();
 
