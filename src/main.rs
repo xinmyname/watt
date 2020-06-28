@@ -1,4 +1,8 @@
 fn main() {
     
-    watt::run();
+    match watt::run() {
+        Ok(_) => {},
+        Err(err) => println!("ERROR: {}", err)
+    }
 }
+

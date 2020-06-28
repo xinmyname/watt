@@ -83,23 +83,18 @@ pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, Box<dyn Err
     }
 
     if args.len() < 1 {
-        return Err(CommandParsingError::new("not enough arguments"));
+        return Err(CommandParsingError::new("Not enough arguments"));
     }
 
     Ok(Box::new(InitCommand {} ))
 }
 
-pub fn run() {
+pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+    
+    let cmd = make_command(std::env::args())?;
+    cmd.execute()?;
 
-    match make_command(std::env::args()) {
-
-        Ok(cmd) => { 
-            cmd.execute().unwrap_or_else(|err| {
-                println!("ERROR: {}", err)
-            });
-        },        
-        Err(err) => println!("ERROR: {}", err)
-    }
+    Ok(())
 }
 
 
