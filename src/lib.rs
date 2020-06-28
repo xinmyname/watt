@@ -1,54 +1,8 @@
 use std::env;
 use std::error::Error;
-use std::fmt;
 use std::collections::VecDeque;
 
-#[derive(Debug)]
-pub struct CommandParsingError {
-    details: String
-}
-
-impl CommandParsingError {
-    fn new(msg: &str) -> Box<CommandParsingError> {
-        Box::new(CommandParsingError{details: msg.to_string()})
-    }
-}
-
-impl fmt::Display for CommandParsingError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,"{}",self.details)
-    }
-}
-
-impl Error for CommandParsingError {
-    fn description(&self) -> &str {
-        &self.details
-    }
-}
-
-#[derive(Debug)]
-pub struct CommandExecutionError {
-    details: String
-}
-
-impl CommandExecutionError {
-    fn new(msg: &str) -> Box<CommandExecutionError> {
-        Box::new(CommandExecutionError{details: msg.to_string()})
-    }
-}
-
-impl fmt::Display for CommandExecutionError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,"{}",self.details)
-    }
-}
-
-impl Error for CommandExecutionError {
-    fn description(&self) -> &str {
-        &self.details
-    }
-}
-
+mod errors;
 
 pub trait Command {
     fn execute(&self) -> Result<(), Box<dyn Error>>;
@@ -70,7 +24,7 @@ struct GenerateCommand {
 
 impl Command for GenerateCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
-        Err(CommandExecutionError::new("Not implemented yet."))
+        Err(errors::CommandExecutionError::new("Not implemented yet."))
     }
 }
 
@@ -83,7 +37,7 @@ pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, Box<dyn Err
     }
 
     if args.len() < 1 {
-        return Err(CommandParsingError::new("Not enough arguments"));
+        return Err(errors::CommandParsingError::new("Not enough arguments"));
     }
 
     Ok(Box::new(InitCommand {} ))
