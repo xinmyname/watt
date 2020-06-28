@@ -6,6 +6,7 @@ pub trait Base {
 
 mod init;
 mod generate;
+mod help;
 
-pub use {init::Init, generate::Generate };
+pub use {init::Init, generate::Generate, help::Help };
 

@@ -13,15 +13,26 @@ pub fn make_command(env_args: env::Args) -> Result<Box<dyn command::Base>, Box<d
         args.push_back(arg);
     }
 
-    if args.len() < 1 {
-        return Err(error::CommandParsing::new("Not enough arguments"));
+    if args.is_empty() {
+        return Ok(Box::new(command::Help {}));
     }
 
-    Ok(Box::new(command::Init {} ))
+    let command_text = args.pop_front().unwrap();
+
+    match &command_text[..] {
+        "/?"|"-?"|"/h"|"-h"|"--help"|"help" => return Ok(Box::new(command::Help {})),
+        _ => {
+            match &command_text[..2] {
+                "in" => return Ok(Box::new(command::Init {})),
+                "ge" => return Ok(Box::new(command::Generate {})),
+                _ => return Err(error::CommandParsing::new(&format!("Unknown command: \"{}\"", command_text)))
+            };
+        }
+    }
 }
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
-    
+ 
     let cmd = make_command(std::env::args())?;
     cmd.execute()?;
 
