@@ -3,15 +3,12 @@ use std::error::Error;
 use std::collections::VecDeque;
 
 mod errors;
-
-pub trait Command {
-    fn execute(&self) -> Result<(), Box<dyn Error>>;
-}
+mod command;
 
 struct InitCommand {
 }
 
-impl Command for InitCommand {
+impl command::Base for InitCommand {
 
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         println!("INIT!");
@@ -22,13 +19,13 @@ impl Command for InitCommand {
 struct GenerateCommand {
 }
 
-impl Command for GenerateCommand {
+impl command::Base for GenerateCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         Err(errors::CommandExecutionError::new("Not implemented yet."))
     }
 }
 
-pub fn make_command(env_args: env::Args) -> Result<Box<dyn Command>, Box<dyn Error>> {
+pub fn make_command(env_args: env::Args) -> Result<Box<dyn command::Base>, Box<dyn Error>> {
 
     let mut args: VecDeque<String> = VecDeque::new();
 
