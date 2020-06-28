@@ -2,10 +2,8 @@ use std::env;
 use std::error::Error;
 use std::collections::VecDeque;
 
-mod errors;
+mod error;
 mod command;
-
-
 
 pub fn make_command(env_args: env::Args) -> Result<Box<dyn command::Base>, Box<dyn Error>> {
 
@@ -16,7 +14,7 @@ pub fn make_command(env_args: env::Args) -> Result<Box<dyn command::Base>, Box<d
     }
 
     if args.len() < 1 {
-        return Err(errors::CommandParsingError::new("Not enough arguments"));
+        return Err(error::CommandParsing::new("Not enough arguments"));
     }
 
     Ok(Box::new(command::Init {} ))
